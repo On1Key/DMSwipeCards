@@ -70,6 +70,15 @@ class DMSwipeCard: UIView {
 			self.originalPoint = self.center
 			break
 		case .changed:
+            //----添加垂直滑动屏蔽-------
+            switch (xFromCenter, yFromCenter) {
+            case let (x, y) where abs(x) >= abs(y) && x > 0:
+                //Right
+            case let (x, y) where abs(x) >= abs(y) && x < 0:
+                //Left
+            default:
+                return
+            //----添加垂直滑动屏蔽-------
 			let rStrength = min(xFromCenter / self.rotationStrength, rotationMax)
 			let rAngle = self.rotationAngle * rStrength
 			let scale = min(1 - fabs(rStrength) / self.scaleStrength, self.scaleMax)
