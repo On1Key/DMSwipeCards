@@ -74,8 +74,10 @@ class DMSwipeCard: UIView {
             switch (xFromCenter, yFromCenter) {
             case let (x, y) where abs(x) >= abs(y) && x > 0:
                 //Right
+                break
             case let (x, y) where abs(x) >= abs(y) && x < 0:
                 //Left
+                break
             default:
                 return
             //----添加垂直滑动屏蔽-------
