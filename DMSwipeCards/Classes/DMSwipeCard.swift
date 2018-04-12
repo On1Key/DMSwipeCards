@@ -80,6 +80,7 @@ class DMSwipeCard: UIView {
                 break
             default:
                 return
+            }
             //----添加垂直滑动屏蔽-------
 			let rStrength = min(xFromCenter / self.rotationStrength, rotationMax)
 			let rAngle = self.rotationAngle * rStrength
