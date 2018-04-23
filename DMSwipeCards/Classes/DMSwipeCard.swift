@@ -63,7 +63,8 @@ class DMSwipeCard: UIView {
 
 	@objc func dragEvent(gesture: UIPanGestureRecognizer) {
 		xFromCenter = gesture.translation(in: self).x
-		yFromCenter = gesture.translation(in: self).y
+		//yFromCenter = gesture.translation(in: self).y
+		yFromCenter = 0//修改原有围绕手势中心点动画，改为围绕x轴的动画
 
 		switch gesture.state {
 		case .began:
