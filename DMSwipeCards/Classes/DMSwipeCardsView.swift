@@ -30,15 +30,41 @@ public class DMSwipeCardsView<Element>: UIView {
 	fileprivate let overlayGenerator: OverlayGenerator?
 	fileprivate var allCards = [Element]()
 	fileprivate var loadedCards = [DMSwipeCard]()
+    
+    //cardsview层级的左右滑动veiw
+    fileprivate var leftV : UIView?
+    fileprivate var rightV : UIView?
+    fileprivate var leftOriX : CGFloat = 0
+    fileprivate var rightOriX : CGFloat = UIScreen.main.bounds.size.width
+    fileprivate var showSwipeView : Bool = false
 
 	public typealias ViewGenerator = (_ element: Element, _ frame: CGRect) -> (UIView)
 	public typealias OverlayGenerator = (_ mode: SwipeMode, _ frame: CGRect) -> (UIView)
 	public init(frame: CGRect,
 	            viewGenerator: @escaping ViewGenerator,
-	            overlayGenerator: OverlayGenerator? = nil) {
+                overlayGenerator: OverlayGenerator? = nil,showLRView:Bool = false) {
 		self.overlayGenerator = overlayGenerator
 		self.viewGenerator = viewGenerator
+        self.showSwipeView = showLRView
 		super.init(frame: frame)
+        if (showSwipeView){
+            
+            var rect = CGRect(x: 0, y: 0, width: self.bounds.width, height: self.bounds.height-80);
+            if let lv = self.overlayGenerator?(.left, rect) {
+                addSubview(lv)
+                bringSubview(toFront: lv)
+                lv.transform = CGAffineTransform.init(scaleX: 0.5, y: 0.5)
+                leftV = lv
+                leftOriX = lv.frame.origin.x
+            }
+            if let rv = self.overlayGenerator?(.right, rect) {
+                addSubview(rv)
+                bringSubview(toFront: rv)
+                rv.transform = CGAffineTransform.init(scaleX: 0.5, y: 0.5)
+                rightV = rv
+                rightOriX = rv.frame.origin.x
+            }
+        }
     self.isUserInteractionEnabled = false
 	}
 
@@ -73,7 +99,7 @@ public class DMSwipeCardsView<Element>: UIView {
 			}
 			loadedCards.removeAll()
 		}
-
+        
 		for element in elements {
 			if loadedCards.count < bufferSize {
 				let cardView = self.createCardView(element: element)
@@ -114,6 +140,31 @@ extension DMSwipeCardsView: DMSwipeCardDelegate {
 			self.loadNextCard()
 		}
 	}
+    
+    func cardSwipedMoving(_ activeX : CGFloat,_ scale : CGFloat,_ left : Bool,_ finish:Bool){
+        guard let lv = leftV else {return}
+        guard let rv = rightV else {return}
+        bringSubview(toFront: lv)
+        bringSubview(toFront: rv)
+        if finish{
+            lv.transform = CGAffineTransform.init(scaleX: 0.5, y: 0.5)
+            rv.transform = CGAffineTransform.init(scaleX: 0.5, y: 0.5)
+            lv.frame = CGRect(x: leftOriX, y: lv.frame.origin.y, width: lv.frame.size.width, height: lv.frame.size.height)
+            rv.frame = CGRect(x: rightOriX, y: rv.frame.origin.y, width: rv.frame.size.width, height: rv.frame.size.height)
+            return
+        }
+        if left{
+            UIView.animate(withDuration: 0.01) {
+                lv.frame = CGRect(x: activeX, y: lv.frame.origin.y, width: lv.frame.size.width, height: lv.frame.size.height)
+                lv.transform = CGAffineTransform(scaleX: scale, y: scale)
+            }
+        }else{
+            UIView.animate(withDuration: 0.01) {
+                rv.frame = CGRect(x: activeX, y: rv.frame.origin.y, width: rv.frame.size.width, height: rv.frame.size.height)
+                rv.transform = CGAffineTransform(scaleX: scale, y: scale)
+            }
+        }
+    }
 
   func cardTapped(_ card: DMSwipeCard) {
     self.delegate?.cardTapped(card.obj)
@@ -142,6 +193,7 @@ extension DMSwipeCardsView {
 
 	fileprivate func createCardView(element: Element) -> DMSwipeCard {
 		let cardView = DMSwipeCard(frame: self.bounds)
+        cardView.showSwipeView = !showSwipeView//这里是否显示滑动view是取反，因为cardsview和card是不会同时显示的，二者显示逻辑相反
 		cardView.delegate = self
 		cardView.obj = element
 		let sv = self.viewGenerator(element, cardView.bounds)
