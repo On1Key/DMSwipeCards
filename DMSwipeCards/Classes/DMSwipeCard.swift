@@ -12,6 +12,7 @@ import UIKit
 protocol DMSwipeCardDelegate: class {
 	func cardSwipedLeft(_ card: DMSwipeCard)
 	func cardSwipedRight(_ card: DMSwipeCard)
+    func cardSwipedMoving(_ activeX: CGFloat,_ scale : CGFloat,_ left: Bool,_ finish:Bool)
   func cardTapped(_ card: DMSwipeCard)
 }
 
@@ -21,9 +22,10 @@ class DMSwipeCard: UIView {
 	var obj: Any!
 	var leftOverlay: UIView?
 	var rightOverlay: UIView?
+    var showSwipeView : Bool = true//显示滑动view，默认显示
 
 	private let actionMargin: CGFloat = 120.0
-	private let rotationStrength: CGFloat = 320.0
+	private let rotationStrength: CGFloat = UIScreen.main.bounds.width
 	private let rotationAngle: CGFloat = CGFloat(Double.pi) / CGFloat(8.0)
 	private let rotationMax: CGFloat = 1
 	private let scaleStrength: CGFloat = -2
@@ -50,6 +52,8 @@ class DMSwipeCard: UIView {
 	}
 
 	func configureOverlays() {
+        self.leftOverlay?.isHidden = !self.showSwipeView
+        self.rightOverlay?.isHidden = !self.showSwipeView
 		self.configureOverlay(overlay: self.leftOverlay)
 		self.configureOverlay(overlay: self.rightOverlay)
 	}
@@ -105,6 +109,7 @@ class DMSwipeCard: UIView {
   }
 
 	private func afterSwipeAction() {
+        self.delegate?.cardSwipedMoving(0,1,false,true)
 		if xFromCenter > actionMargin {
 			self.rightAction()
 		} else if xFromCenter < -actionMargin {
@@ -196,7 +201,8 @@ class DMSwipeCard: UIView {
                     activeX = centerX - activeW * 0.5
                 }
             }
-            print(#function,#line,distance,activeX)
+            self.delegate?.cardSwipedMoving(activeX,proportion*0.5+0.5,distance<=0,false)
+//            print(#function,#line,distance,activeX)
             UIView .animate(withDuration: 0.01, animations: {
                 activeView.frame = CGRect(x: activeX, y: (activeView.frame.origin.y), width: (activeView.frame.size.width), height: (activeView.frame.size.height))
                 activeView.transform = CGAffineTransform(scaleX: proportion*0.5+0.5, y: proportion*0.5+0.5)
