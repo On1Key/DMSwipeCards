@@ -51,9 +51,14 @@ class DMSwipeCard: UIView {
 		fatalError("init(coder:) has not been implemented")
 	}
 
-	func configureOverlays() {
+	func resetShowSwipeState(show:Bool){
+        self.showSwipeView = show
         self.leftOverlay?.isHidden = !self.showSwipeView
         self.rightOverlay?.isHidden = !self.showSwipeView
+    }
+    
+	func configureOverlays() {
+        resetShowSwipeState(show: self.showSwipeView)
 		self.configureOverlay(overlay: self.leftOverlay)
 		self.configureOverlay(overlay: self.rightOverlay)
 	}
