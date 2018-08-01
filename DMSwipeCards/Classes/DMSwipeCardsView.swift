@@ -37,6 +37,15 @@ public class DMSwipeCardsView<Element>: UIView {
     fileprivate var leftOriX : CGFloat = 0
     fileprivate var rightOriX : CGFloat = UIScreen.main.bounds.size.width
     fileprivate var showSwipeView : Bool = false
+	
+	public func resetShowSwipeViewState(show:Bool){
+        self.showSwipeView = show
+        leftV?.isHidden = !show
+        rightV?.isHidden = !show
+        _ = self.loadedCards.map { (card) -> Void in
+            card.resetShowSwipeState(show: !show)
+        }
+    }
 
 	public typealias ViewGenerator = (_ element: Element, _ frame: CGRect) -> (UIView)
 	public typealias OverlayGenerator = (_ mode: SwipeMode, _ frame: CGRect) -> (UIView)
