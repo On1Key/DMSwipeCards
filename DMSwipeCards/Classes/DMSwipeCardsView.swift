@@ -191,7 +191,7 @@ extension DMSwipeCardsView {
 	}
 
 	fileprivate func loadNextCard() {
-		if self.allCards.count - self.loadedCards.count > 0 {
+		if self.allCards.count - self.loadedCards.count > 0  && self.loadedCards.last != nil {
 			let next = self.allCards[loadedCards.count]
 			let nextView = self.createCardView(element: next)
 			let below = self.loadedCards.last!
