@@ -120,6 +120,12 @@ public class DMSwipeCardsView<Element>: UIView {
 				self.loadedCards.append(cardView)
 			}
 		}
+		if let lv = leftV{
+            bringSubview(toFront: lv)
+        }
+        if let rv = rightV{
+            bringSubview(toFront: rv)
+        }
 	}
 
 	func swipeTopCardRight() {
