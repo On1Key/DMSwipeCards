@@ -17,8 +17,10 @@ public enum SwipeMode {
 public protocol DMSwipeCardsViewDelegate: class {
 	func swipedLeft(_ object: Any)
 	func swipedRight(_ object: Any)
-  func cardTapped(_ object: Any)
+    func cardTapped(_ object: Any)
 	func reachedEndOfStack()
+    ///左右滑动暂停代理,和continue闭包(闭包执行完毕，函数最终还会调用swipedLeft或者right代理),返回值为是否暂停操作
+    func swipedLeftOrRightResume(_ object: Any,_ left:Bool,_ continueHandler:@escaping ((_ cancelSwipe:Bool) -> Void)) -> Bool
 }
 
 public class DMSwipeCardsView<Element>: UIView {
@@ -74,7 +76,7 @@ public class DMSwipeCardsView<Element>: UIView {
                 rightOriX = rv.frame.origin.x
             }
         }
-    self.isUserInteractionEnabled = false
+        self.isUserInteractionEnabled = false
 	}
 
 	override private init(frame: CGRect) {
@@ -180,10 +182,17 @@ extension DMSwipeCardsView: DMSwipeCardDelegate {
             }
         }
     }
+    
+    func cardSwipeResume(_ card: DMSwipeCard, _ left: Bool, _ continueHandler: @escaping ((_ cancelSwipe:Bool) -> Void)) -> Bool {
+        if let resume = self.delegate?.swipedLeftOrRightResume(card.obj, left, continueHandler){
+            return resume
+        }
+        return false
+    }
 
-  func cardTapped(_ card: DMSwipeCard) {
-    self.delegate?.cardTapped(card.obj)
-  }
+    func cardTapped(_ card: DMSwipeCard) {
+        self.delegate?.cardTapped(card.obj)
+    }
 }
 
 extension DMSwipeCardsView {
