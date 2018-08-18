@@ -12,8 +12,11 @@ import UIKit
 protocol DMSwipeCardDelegate: class {
 	func cardSwipedLeft(_ card: DMSwipeCard)
 	func cardSwipedRight(_ card: DMSwipeCard)
+    ///滑动过程的回调，用来处理外部足有模拟悬浮框的操作
     func cardSwipedMoving(_ activeX: CGFloat,_ scale : CGFloat,_ left: Bool,_ finish:Bool)
-  func cardTapped(_ card: DMSwipeCard)
+    ///滑动过程的暂停，返回值true进行resume操作，并由闭包进行后续的continue事件(闭包的的参数为取消滑动后续操作，默认不取消)
+    func cardSwipeResume(_ card: DMSwipeCard,_ left : Bool,_ continueHandler:@escaping ((_ cancelSwipe:Bool) -> Void)) -> Bool
+    func cardTapped(_ card: DMSwipeCard)
 }
 
 class DMSwipeCard: UIView {
@@ -80,18 +83,6 @@ class DMSwipeCard: UIView {
 			self.originalPoint = self.center
 			break
 		case .changed:
-            //----添加垂直滑动屏蔽-------
-            //switch (xFromCenter, yFromCenter) {
-            //case let (x, y) where abs(x) >= abs(y) && x > 0:
-              //  //Right
-             //   break
-            //case let (x, y) where abs(x) >= abs(y) && x < 0:
-              //  //Left
-             //   break
-            //default:
-            //    return
-            //}
-            //----添加垂直滑动屏蔽-------
 			let rStrength = min(xFromCenter / self.rotationStrength, rotationMax)
 			let rAngle = self.rotationAngle * rStrength
 			let scale = min(1 - fabs(rStrength) / self.scaleStrength, self.scaleMax)
@@ -115,18 +106,53 @@ class DMSwipeCard: UIView {
 
 	private func afterSwipeAction() {
         self.delegate?.cardSwipedMoving(0,1,false,true)
-		if xFromCenter > actionMargin {
-			self.rightAction()
-		} else if xFromCenter < -actionMargin {
-			self.leftAction()
-		} else {
-			UIView.animate(withDuration: 0.3) {
-				self.center = self.originalPoint
-				self.transform = CGAffineTransform.identity
-				self.leftOverlay?.alpha = 0.0
-				self.rightOverlay?.alpha = 0.0
-			}
-		}
+        
+        ///回到初始状态
+        func insideToOriginalAction(){
+            UIView.animate(withDuration: 0.3) {
+                self.center = self.originalPoint
+                self.transform = CGAffineTransform.identity
+                self.leftOverlay?.alpha = 0.0
+                self.rightOverlay?.alpha = 0.0
+            }
+        }
+        
+        ///触发左右滑动之后，通过代理返回值，确定是否进行由外部决定的结束滑动事件
+        func insideLeftOrRightAction(_ left:Bool){
+            let resumeValue = self.delegate?.cardSwipeResume(self,left, {
+                (cancelSwipe) in
+                //回调处理后续事件
+                if cancelSwipe == true{
+                    insideToOriginalAction()
+                }else{
+                    if left{
+                        self.leftAction()
+                    }else{
+                        self.rightAction()
+                    }
+                }
+            })
+            if resumeValue == true{
+                //暂停有真值，后续事件交由回调处理
+            }else{
+                //如果没有暂停，或者暂停值为false，自动运行后续过程
+                if left{
+                    self.leftAction()
+                }else{
+                    self.rightAction()
+                }
+            }
+            
+        }
+        
+        //只有触发阈值才会响应代理
+        if xFromCenter > actionMargin {
+            insideLeftOrRightAction(false)
+        } else if xFromCenter < -actionMargin {
+            insideLeftOrRightAction(true)
+        } else {
+            insideToOriginalAction()
+        }
 	}
 
 	private func updateOverlay(_ distance: CGFloat) {
@@ -143,46 +169,6 @@ class DMSwipeCard: UIView {
 		
 		//------添加左右动效-------------
         if let activeView = activeOverlay{
-            
-            //尝试使用convert，失败
-////            let activeW = activeView.frame.size.width
-//            let screenW = UIScreen.main.bounds.size.width
-//
-////            if distance == 0.001 {
-////                activeView.center = CGPoint(x: self.frame.size.width * 0.5, y: activeView.center.y)
-////            }else if distance == -0.001 {
-////                activeView.center = CGPoint(x: 0, y: activeView.center.y)
-////            }
-//
-//            let activeCenterToWindow = activeView.convert(activeView.center, to: UIApplication.shared.keyWindow!)
-//
-//            let proportion = fabs(distance)/(screenW * 0.5)
-//            var activeCenterX:CGFloat =  activeView.center.x
-//            print("\n")
-//            print("activeCenterToWindow=",activeCenterToWindow)
-//            if distance > 0 {
-//                activeCenterX = screenW - fabs(distance)/
-////                if distance >= (self.convert(self.center, to: UIApplication.shared.keyWindow!).x - screenW * 0.5) {
-////                    activeCenterX = self.center.x
-////                }
-//            }else{
-//                activeCenterX = fabs(distance) + 100
-////                if fabs(distance) >= screenW - self.convert(self.center, to: UIApplication.shared.keyWindow!).x {
-////                    activeCenterX = self.center.x
-////                }
-//            }
-////            print(#function,#line,distance,activeCenterX)
-//            let centerFromWindow = activeView.convert(CGPoint(x: activeCenterX, y: activeCenterToWindow.y), from: UIApplication.shared.keyWindow!)
-//            print("distance=",distance)
-//            print("centerFromWindow=",centerFromWindow)
-//            print("rect ori=",activeView.frame)
-//            print("rect con=",activeView.convert(activeView.frame, to: UIApplication.shared.keyWindow!))
-//            UIView .animate(withDuration: 0.01, animations: {
-//                activeView.center = CGPoint(x: activeCenterX, y: activeView.center.y)
-////                activeView.transform = CGAffineTransform.init(scaleX: proportion, y: proportion)
-//            }) { (complete) in
-//
-//            }
             
             //改用frame的x值修改动画
             let activeW = activeView.frame.size.width
@@ -218,14 +204,14 @@ class DMSwipeCard: UIView {
         //------添加左右动效-------------
 	}
 
-	private func rightAction() {
+    private func rightAction() {
 		let finishPoint = CGPoint(x: 500, y: 2 * yFromCenter + self.originalPoint.y)
 		UIView.animate(withDuration: 0.3, animations: { 
 			self.center = finishPoint
 		}) { _ in
 			self.removeFromSuperview()
 		}
-		self.delegate?.cardSwipedRight(self)
+        self.delegate?.cardSwipedRight(self)
 	}
 
 	private func leftAction() {
@@ -235,7 +221,7 @@ class DMSwipeCard: UIView {
 		}) { _ in
 			self.removeFromSuperview()
 		}
-		self.delegate?.cardSwipedLeft(self)
+        self.delegate?.cardSwipedLeft(self)
 	}
 }
 
