@@ -10,8 +10,8 @@ import Foundation
 import UIKit
 
 protocol DMSwipeCardDelegate: class {
-	func cardSwipedLeft(_ card: DMSwipeCard)
-	func cardSwipedRight(_ card: DMSwipeCard)
+    func cardSwipedLeft(_ card: DMSwipeCard)
+    func cardSwipedRight(_ card: DMSwipeCard)
     ///滑动过程的回调，用来处理外部足有模拟悬浮框的操作
     func cardSwipedMoving(_ activeX: CGFloat,_ scale : CGFloat,_ left: Bool,_ finish:Bool)
     ///滑动过程的暂停，返回值true进行resume操作，并由闭包进行后续的continue事件(闭包的的参数为取消滑动后续操作，默认不取消)
@@ -20,91 +20,118 @@ protocol DMSwipeCardDelegate: class {
 }
 
 class DMSwipeCard: UIView {
-
-	weak var delegate: DMSwipeCardDelegate?
-	var obj: Any!
-	var leftOverlay: UIView?
-	var rightOverlay: UIView?
+    
+    weak var delegate: DMSwipeCardDelegate?
+    var obj: Any!
+    var leftOverlay: UIView?
+    var rightOverlay: UIView?
     var showSwipeView : Bool = true//显示滑动view，默认显示
-
-	private let actionMargin: CGFloat = 120.0
-	private let rotationStrength: CGFloat = UIScreen.main.bounds.width
-	private let rotationAngle: CGFloat = CGFloat(Double.pi) / CGFloat(8.0)
-	private let rotationMax: CGFloat = 1
-	private let scaleStrength: CGFloat = -2
-	private let scaleMax: CGFloat = 1.02
-
-	private var xFromCenter: CGFloat = 0.0
-	private var yFromCenter: CGFloat = 0.0
-	private var originalPoint = CGPoint.zero
-
-	override init(frame: CGRect) {
-		super.init(frame: frame)
-
-		let panGesture = UIPanGestureRecognizer(target: self, action: #selector(dragEvent(gesture:)))
-		panGesture.delegate = self
-		self.addGestureRecognizer(panGesture)
-
-    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapEvent(gesture:)))
-    tapGesture.delegate = self
-    self.addGestureRecognizer(tapGesture)
-  }
-
-	required init?(coder aDecoder: NSCoder) {
-		fatalError("init(coder:) has not been implemented")
-	}
-
-	func resetShowSwipeState(show:Bool){
+    
+    private let actionMargin: CGFloat = 120.0
+    private let rotationStrength: CGFloat = UIScreen.main.bounds.width
+    private let rotationAngle: CGFloat = CGFloat(Double.pi) / CGFloat(8.0)
+    private let rotationMax: CGFloat = 1
+    private let scaleStrength: CGFloat = -2
+    private let scaleMax: CGFloat = 1.02
+    
+    private var xFromCenter: CGFloat = 0.0
+    private var yFromCenter: CGFloat = 0.0
+    private var originalPoint = CGPoint.zero
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(dragEvent(gesture:)))
+        panGesture.delegate = self
+        self.addGestureRecognizer(panGesture)
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapEvent(gesture:)))
+        tapGesture.delegate = self
+        self.addGestureRecognizer(tapGesture)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func resetShowSwipeState(show:Bool){
         self.showSwipeView = show
         self.leftOverlay?.isHidden = !self.showSwipeView
         self.rightOverlay?.isHidden = !self.showSwipeView
     }
     
-	func configureOverlays() {
+    func configureOverlays() {
         resetShowSwipeState(show: self.showSwipeView)
-		self.configureOverlay(overlay: self.leftOverlay)
-		self.configureOverlay(overlay: self.rightOverlay)
-	}
-
-	private func configureOverlay(overlay: UIView?) {
-		if let o = overlay {
-			self.addSubview(o)
-			o.alpha = 0.0
-		}
-	}
-
-	@objc func dragEvent(gesture: UIPanGestureRecognizer) {
-		xFromCenter = gesture.translation(in: self).x
-		//yFromCenter = gesture.translation(in: self).y
-		yFromCenter = 0//修改原有围绕手势中心点动画，改为围绕x轴的动画
-
-		switch gesture.state {
-		case .began:
-			self.originalPoint = self.center
-			break
-		case .changed:
-			let rStrength = min(xFromCenter / self.rotationStrength, rotationMax)
-			let rAngle = self.rotationAngle * rStrength
-			let scale = min(1 - fabs(rStrength) / self.scaleStrength, self.scaleMax)
-			self.center = CGPoint(x: self.originalPoint.x + xFromCenter, y: self.originalPoint.y + yFromCenter)
-			let transform = CGAffineTransform(rotationAngle: rAngle)
-			let scaleTransform = transform.scaledBy(x: scale, y: scale)
-			self.transform = scaleTransform
-			self.updateOverlay(xFromCenter)
-			break
-		case .ended:
-			self.afterSwipeAction()
-			break
-		default:
-			break
-		}
-	}
-
-  @objc func tapEvent(gesture: UITapGestureRecognizer) {
-    self.delegate?.cardTapped(self)
-  }
-
-	private func afterSwipeAction() {
+        self.configureOverlay(overlay: self.leftOverlay)
+        self.configureOverlay(overlay: self.rightOverlay)
+    }
+    
+    private func configureOverlay(overlay: UIView?) {
+        if let o = overlay {
+            self.addSubview(o)
+            o.alpha = 0.0
+        }
+    }
+    
+    func autoSwipeMoveToLRAction(_ left:Bool){
+        
+        var leftFlag : CGFloat = -1
+        if left == false{
+            leftFlag = 1
+        }
+        
+        self.xFromCenter = 120 * leftFlag
+        self.yFromCenter = 0
+        self.originalPoint = self.center
+        UIView.animate(withDuration: 0.2, delay: 0, options: UIViewAnimationOptions.curveEaseInOut, animations: {
+            let rStrength = min(self.xFromCenter / self.rotationStrength, self.rotationMax)
+            let rAngle = self.rotationAngle * rStrength
+            let scale = min(1 - fabs(rStrength) / self.scaleStrength, self.scaleMax)
+            self.center = CGPoint(x: self.originalPoint.x + self.xFromCenter, y: self.originalPoint.y + self.yFromCenter)
+            let transform = CGAffineTransform(rotationAngle: rAngle)
+            let scaleTransform = transform.scaledBy(x: scale, y: scale)
+            self.transform = scaleTransform
+            self.updateOverlay(self.xFromCenter)
+        }) { (success) in
+            self.xFromCenter = 200 * leftFlag
+            self.yFromCenter = 0
+            self.afterSwipeAction()
+        }
+        
+    }
+    
+    @objc func dragEvent(gesture: UIPanGestureRecognizer) {
+        xFromCenter = gesture.translation(in: self).x
+        //yFromCenter = gesture.translation(in: self).y
+        yFromCenter = 0//修改原有围绕手势中心点动画，改为围绕x轴的动画
+        
+        switch gesture.state {
+        case .began:
+            self.originalPoint = self.center
+            break
+        case .changed:
+            let rStrength = min(xFromCenter / self.rotationStrength, rotationMax)
+            let rAngle = self.rotationAngle * rStrength
+            let scale = min(1 - fabs(rStrength) / self.scaleStrength, self.scaleMax)
+            self.center = CGPoint(x: self.originalPoint.x + xFromCenter, y: self.originalPoint.y + yFromCenter)
+            let transform = CGAffineTransform(rotationAngle: rAngle)
+            let scaleTransform = transform.scaledBy(x: scale, y: scale)
+            self.transform = scaleTransform
+            self.updateOverlay(xFromCenter)
+            break
+        case .ended:
+            self.afterSwipeAction()
+            break
+        default:
+            break
+        }
+    }
+    
+    @objc func tapEvent(gesture: UITapGestureRecognizer) {
+        self.delegate?.cardTapped(self)
+    }
+    
+    private func afterSwipeAction() {
         self.delegate?.cardSwipedMoving(0,1,false,true)
         
         ///回到初始状态
@@ -153,21 +180,21 @@ class DMSwipeCard: UIView {
         } else {
             insideToOriginalAction()
         }
-	}
-
-	private func updateOverlay(_ distance: CGFloat) {
-		var activeOverlay: UIView?
-		if (distance > 0) {
-			self.leftOverlay?.alpha = 0.0
-			activeOverlay = self.rightOverlay
-		} else {
-			self.rightOverlay?.alpha = 0.0
-			activeOverlay = self.leftOverlay
-		}
-
-		activeOverlay?.alpha = min(fabs(distance)/100, 1.0)
-		
-		//------添加左右动效-------------
+    }
+    
+    private func updateOverlay(_ distance: CGFloat) {
+        var activeOverlay: UIView?
+        if (distance > 0) {
+            self.leftOverlay?.alpha = 0.0
+            activeOverlay = self.rightOverlay
+        } else {
+            self.rightOverlay?.alpha = 0.0
+            activeOverlay = self.leftOverlay
+        }
+        
+        activeOverlay?.alpha = min(fabs(distance)/100, 1.0)
+        
+        //------添加左右动效-------------
         if let activeView = activeOverlay{
             
             //改用frame的x值修改动画
@@ -193,40 +220,40 @@ class DMSwipeCard: UIView {
                 }
             }
             self.delegate?.cardSwipedMoving(activeX,proportion*0.5+0.5,distance<=0,false)
-//            print(#function,#line,distance,activeX)
+            //            print(#function,#line,distance,activeX)
             UIView .animate(withDuration: 0.01, animations: {
                 activeView.frame = CGRect(x: activeX, y: (activeView.frame.origin.y), width: (activeView.frame.size.width), height: (activeView.frame.size.height))
                 activeView.transform = CGAffineTransform(scaleX: proportion*0.5+0.5, y: proportion*0.5+0.5)
             }) { (complete) in
-
+                
             }
         }
         //------添加左右动效-------------
-	}
-
+    }
+    
     private func rightAction() {
-		let finishPoint = CGPoint(x: 500, y: 2 * yFromCenter + self.originalPoint.y)
-		UIView.animate(withDuration: 0.3, animations: { 
-			self.center = finishPoint
-		}) { _ in
-			self.removeFromSuperview()
-		}
+        let finishPoint = CGPoint(x: 500, y: 2 * yFromCenter + self.originalPoint.y)
+        UIView.animate(withDuration: 0.1, animations: {
+            self.center = finishPoint
+        }) { _ in
+            self.removeFromSuperview()
+        }
         self.delegate?.cardSwipedRight(self)
-	}
-
-	private func leftAction() {
-		let finishPoint = CGPoint(x: -500, y: 2 * yFromCenter + self.originalPoint.y)
-		UIView.animate(withDuration: 0.3, animations: {
-			self.center = finishPoint
-		}) { _ in
-			self.removeFromSuperview()
-		}
+    }
+    
+    private func leftAction() {
+        let finishPoint = CGPoint(x: -500, y: 2 * yFromCenter + self.originalPoint.y)
+        UIView.animate(withDuration: 0.1, animations: {
+            self.center = finishPoint
+        }) { _ in
+            self.removeFromSuperview()
+        }
         self.delegate?.cardSwipedLeft(self)
-	}
+    }
 }
 
 extension DMSwipeCard: UIGestureRecognizerDelegate {
-	func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-		return false
-	}
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return false
+    }
 }
