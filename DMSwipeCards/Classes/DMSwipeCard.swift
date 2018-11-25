@@ -72,7 +72,36 @@ class DMSwipeCard: UIView {
             o.alpha = 0.0
         }
     }
-    
+    ///自动撤回卡片到中心
+    func autoSwipeMoveToCenterAction(_ left:Bool){
+        var leftFlag : CGFloat = -1
+        if left == false{
+            leftFlag = 1
+        }
+        
+        let ori = self.superview?.center ?? CGPoint.zero
+        self.originalPoint = ori
+        self.yFromCenter = 30
+        let finishPoint = CGPoint(x: 500 * leftFlag, y: 2 * self.yFromCenter + self.originalPoint.y)
+        self.xFromCenter = self.originalPoint.x * leftFlag
+        self.center = finishPoint
+        
+        let rStrength = min(self.xFromCenter / self.rotationStrength, self.rotationMax)
+        let rAngle = self.rotationAngle * rStrength
+        let scale = min(1 - fabs(rStrength) / self.scaleStrength, self.scaleMax)
+        let transform = CGAffineTransform(rotationAngle: rAngle)
+        let scaleTransform = transform.scaledBy(x: scale, y: scale)
+        self.transform = scaleTransform
+        
+        UIView.animate(withDuration: 1, delay: 0, options: UIViewAnimationOptions.curveEaseInOut, animations: {
+            self.center = ori
+            self.transform = CGAffineTransform.identity
+        }) { (success) in
+            self.leftOverlay?.alpha = 0.0
+            self.rightOverlay?.alpha = 0.0
+        }
+    }
+    ///自动滑动卡片到一侧
     func autoSwipeMoveToLRAction(_ left:Bool){
         
         var leftFlag : CGFloat = -1

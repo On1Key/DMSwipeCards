@@ -55,6 +55,14 @@ public class DMSwipeCardsView<Element>: UIView {
     public func autoSwipeToNextCard(left:Bool){
         loadedCards.first?.autoSwipeMoveToLRAction(left)
     }
+    ///是否非手势自动撤回一张卡片，从左边或者右边撤回，默认左边
+    public func autoSwipeToFrontCard(left:Bool = true,card:Element){
+        var allNewCards = [Element]()
+        allNewCards.append(card)
+        allNewCards.append(contentsOf: self.allCards)
+        self.addCards(allNewCards, onTop: true)
+        loadedCards.first?.autoSwipeMoveToCenterAction(left)
+    }
     
     public typealias ViewGenerator = (_ element: Element, _ frame: CGRect) -> (UIView)
     public typealias OverlayGenerator = (_ mode: SwipeMode, _ frame: CGRect) -> (UIView)
