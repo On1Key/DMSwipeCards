@@ -93,7 +93,7 @@ class DMSwipeCard: UIView {
         let scaleTransform = transform.scaledBy(x: scale, y: scale)
         self.transform = scaleTransform
         
-        UIView.animate(withDuration: 1, delay: 0, options: UIViewAnimationOptions.curveEaseInOut, animations: {
+        UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseInOut, animations: {
             self.center = ori
             self.transform = CGAffineTransform.identity
         }) { (success) in
