@@ -15,6 +15,7 @@ Written in Swift 3, supports custom views for the card and the overlay. Views ge
   s.social_media_url = 'https://twitter.com/dylan36032'
 
   s.ios.deployment_target = '8.0'
+  s.swift_version = '4.0'
 
   s.source_files = 'DMSwipeCards/Classes/**/*'
 end
