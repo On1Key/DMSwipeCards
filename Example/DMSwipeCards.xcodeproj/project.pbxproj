@@ -42,7 +42,7 @@
 		79D49D4CA52D2D5FAE0A4FB4 /* Pods-DMSwipeCards_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DMSwipeCards_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-DMSwipeCards_Example/Pods-DMSwipeCards_Example.release.xcconfig"; sourceTree = "<group>"; };
 		7E72897F699D50996F044DB5 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		8D1421C8DEBC15509002FEE1 /* Pods-DMSwipeCards_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DMSwipeCards_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DMSwipeCards_Example/Pods-DMSwipeCards_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		A2EE6D2C56338D5D1DFA615C /* DMSwipeCards.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = DMSwipeCards.podspec; path = ../DMSwipeCards.podspec; sourceTree = "<group>"; };
+		A2EE6D2C56338D5D1DFA615C /* DMSwipeCards.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = DMSwipeCards.podspec; path = ../DMSwipeCards.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		A6141AE14A14A9F5D1AC3FA4 /* Pods_DMSwipeCards_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DMSwipeCards_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4D2A18B3C40A0ECA3C6D57A /* Pods-DMSwipeCards_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DMSwipeCards_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DMSwipeCards_Tests/Pods-DMSwipeCards_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		C879166BF64B71F80EAE783B /* Pods_DMSwipeCards_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DMSwipeCards_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -215,7 +215,7 @@
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
-						DevelopmentTeam = U69N6KJ99T;
+						DevelopmentTeam = 2RCQG8AQC9;
 						LastSwiftMigration = 0900;
 					};
 					607FACE41AFB9204008FA782 = {
@@ -231,6 +231,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -519,7 +520,7 @@
 			baseConfigurationReference = 8D1421C8DEBC15509002FEE1 /* Pods-DMSwipeCards_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = U69N6KJ99T;
+				DEVELOPMENT_TEAM = 2RCQG8AQC9;
 				INFOPLIST_FILE = DMSwipeCards/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
@@ -535,7 +536,7 @@
 			baseConfigurationReference = 79D49D4CA52D2D5FAE0A4FB4 /* Pods-DMSwipeCards_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = U69N6KJ99T;
+				DEVELOPMENT_TEAM = 2RCQG8AQC9;
 				INFOPLIST_FILE = DMSwipeCards/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;

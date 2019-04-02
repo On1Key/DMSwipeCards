@@ -89,6 +89,10 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: DMSwipeCardsViewDelegate {
+    func swipedLeftOrRightResume(_ object: Any, _ left: Bool, _ continueHandler: @escaping ((Bool) -> Void)) -> Bool {
+        return false
+    }
+    
   func swipedLeft(_ object: Any) {
     print("Swiped left: \(object)")
   }
